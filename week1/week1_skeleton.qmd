@@ -176,17 +176,32 @@ tbl_2 %>%
 Let's now add our `treat` variable into the table, so we can see how lobster catch varied within our control and MPA groups. This will be a 3 way table! 
 
 ```{r}
-
+tbl_3 <- lobsters %>% 
+    # Calculate total cpue for each year/ region/ trt group
+    group_by(year,region, treat) %>% 
+    summarize(total_cpue = sum(cpue, na.rm = TRUE),
+              # Ungrouping
+              .groups = "drop") %>% 
+    # Pivot to create column for each treatment/ control group within each region
+    pivot_wider(names_from = c(region,treat),
+                values_from = total_cpue) %>% 
+    # Arrange by Year
+    arrange(year)
 ```
 
 Time to use `{gt}` to make this into a nice looking table!!
 
 ```{r}
-
+tbl_3 %>% 
+    gt(rowname_col = "year") %>% 
+    tab_header(
+        title = "European Lobster Catch by Treatment, Region, and Year",
+        subtitle = "Total Catch Per Unit Effort (CPUE)"
+    ) %>% 
   tab_spanner(
     label = "Bolærne",
     columns = c("bol_con", "bol_mpa")
-  ) %>%
+    ) %>%
   tab_spanner(
     label = "Flødevigen",
     columns = c("flo_con", "flo_mpa")
@@ -194,7 +209,16 @@ Time to use `{gt}` to make this into a nice looking table!!
   tab_spanner(
     label = "Kvernskjær",
     columns = c("kve_con", "kve_mpa")
-  ) 
+  ) %>% 
+    tab_source_note("Source: Moland et al., 2013") %>% 
+    cols_label(
+        bol_con = "Control",
+        bol_mpa = "MPA",
+        flo_con = "Control",
+        flo_mpa = "MPA",        
+        kve_con = "Control",
+        kve_mpa = "MPA"
+    )
 
 ```
 
@@ -203,7 +227,33 @@ Time to use `{gt}` to make this into a nice looking table!!
 We can add plots within our table as well! While maybe not completely necessary in this instance, it can be a helpful tool to have! 
 
 ```{r}
+table_w_plots <- lobsters %>% 
+    
+    # Calculate total cpue for each year
+    group_by(year) %>% 
+    summarize(total_cpue = sum(cpue, na.rm = TRUE),
+              # Store all individual cpue values as a list for each year
+              dist_cpue = list(cpue),
+              .groups = "drop"
+              ) %>% 
+    arrange(year) %>% 
+    gt() %>% 
+    tab_header( title = "European Lobster Catch Totals and Distribution (2006-2010)",
+                subtitle = "Total Catch Per Unit Effort (CPUE)") %>% 
+    cols_label(
+        year = "Year",
+        total_cpue = "Total CPUE",
+        dist_cpue = "Density CPUE"
+    ) %>% 
+    # Add in-line density plot
+    gtExtras::gt_plt_dist(
+        dist_cpue,
+        type = "density",
+        line_color = "dodgerblue",
+        fill_color = "firebrick"
+    )
 
+table_w_plots
 ```
 
 
@@ -214,7 +264,8 @@ We can add plots within our table as well! While maybe not completely necessary 
 library(praise)
 library(cowsay)
 library(beepr)
-say("All done making some beautiful tables! :) ", "whale"); beep(3)  
+say("All done making some beautiful tables! :) ", "blowfish"); beep(9)  
+
 
 ```
 
@@ -226,7 +277,12 @@ say("All done making some beautiful tables! :) ", "whale"); beep(3)
 With your group, answer the following questions from the Buntaine article. 
 
 1. What prompted this study? 
+Air quality issues, waste burning
 2. How were the treatment and control groups formed? 
+44 nieghborhoods, 
 3. Was the social competition strategy effective? 
+Yes, it was 24% reduction
+
+5. the metric they use were the number of waste piles
 
 
