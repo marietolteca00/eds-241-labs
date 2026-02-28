@@ -83,7 +83,7 @@ This lab uses a simplified example loosely based on the study by Lessmann & Kram
 We use the following pre-treatment (2000–2012) averages as predictors to construct the synthetic control:
 
 | Variable            | Description                               | Role      |
-|------------------|------------------------------------|------------------|
+|---------------------|-------------------------------------------|-----------|
 | `coal_share`        | Share of electricity generation from coal | Predictor |
 | `income_pc`         | Per capita income                         | Predictor |
 | `elec_price`        | Electricity price                         | Predictor |
